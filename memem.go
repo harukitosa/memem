@@ -2,25 +2,29 @@ package memem
 
 import "sync"
 
-type Cache struct {
-	Data map[string]interface{}
+type Cache interface {
+	Set(key string, value interface{})
+	Get(key string) interface{}
+}
+
+type CacheInMemory struct {
+	store map[string]interface{}
 	sync.Mutex
 }
 
-func NewCache() *Cache {
+func NewCache() Cache {
 	m := make(map[string]interface{})
-	c := &Cache{
-		Data: m,
+	return &CacheInMemory{
+		store: m,
 	}
-	return c
 }
 
-func (c *Cache) Append(key string, value interface{}) {
+func (c *CacheInMemory) Set(key string, value interface{}) {
 	c.Lock()
-	c.Data[key] = value
+	c.store[key] = value
 	c.Unlock()
 }
 
-func (c *Cache) Get(key string) interface{} {
-	return c.Data[key]
+func (c *CacheInMemory) Get(key string) interface{} {
+	return c.store[key]
 }
