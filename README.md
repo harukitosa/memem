@@ -33,10 +33,3 @@ func main() {
 # Contributing
 
 We are waiting for the pullrequest.
-
-<style>
-.center {
-    text-align: center;
-    font-weight: bold;
-}
-</style>
