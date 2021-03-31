@@ -8,7 +8,7 @@ The key is of type string and the value can be any Object.
 
 
 ```
-go get github.com/harukitosa/memem
+go get -u github.com/harukitosa/memem
 ```
 
 # sample
