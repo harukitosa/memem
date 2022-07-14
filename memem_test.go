@@ -85,3 +85,23 @@ func TestWithTimerClearCallback(t *testing.T) {
 		t.Errorf("data is not callbackvalue")
 	}
 }
+
+func TestWithTimerClearNewSet(t *testing.T) {
+	c := NewCache()
+	c.Set("key", "same value")
+	time.Sleep(2 * time.Second)
+	value := c.GetOrClearIfOverTheTimeLimit("key", 1*time.Second)
+	if value != nil {
+		t.Error("data is not null")
+	}
+	c.Set("key", "new value")
+	value2 := c.GetOrClearIfOverTheTimeLimit("key", 1*time.Second)
+	if value2 != "new value" {
+		t.Errorf("data is not null")
+	}
+	time.Sleep(2 * time.Second)
+	value3 := c.GetOrClearIfOverTheTimeLimit("key", 1*time.Second)
+	if value3 != nil {
+		t.Error("data is not null")
+	}
+}
