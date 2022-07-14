@@ -2,6 +2,7 @@ package memem
 
 import (
 	"testing"
+	"time"
 )
 
 func TestCache(t *testing.T) {
@@ -49,5 +50,38 @@ func TestCallbackCache(t *testing.T) {
 	}
 	if value != "callback result" {
 		t.Error("is not callback value")
+	}
+}
+
+func TestWithTimer(t *testing.T) {
+	c := NewCacheWithCallback(func() interface{} {
+		return "callback result"
+	})
+	c.Set("key", "same value")
+	value := c.GetOrClearIfOverTheTimeLimit("key", 2*time.Second)
+	if value != "same value" {
+		t.Error("data is null")
+	}
+}
+
+func TestWithTimerClear(t *testing.T) {
+	c := NewCache()
+	c.Set("key", "same value")
+	time.Sleep(2 * time.Second)
+	value := c.GetOrClearIfOverTheTimeLimit("key", 1*time.Second)
+	if value != nil {
+		t.Error("data is not null")
+	}
+}
+
+func TestWithTimerClearCallback(t *testing.T) {
+	c := NewCacheWithCallback(func() interface{} {
+		return "callbackvalue"
+	})
+	c.Set("key", "same value")
+	time.Sleep(2 * time.Second)
+	value := c.GetOrClearIfOverTheTimeLimit("key", 1*time.Second)
+	if value != "callbackvalue" {
+		t.Errorf("data is not callbackvalue")
 	}
 }
