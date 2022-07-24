@@ -14,7 +14,7 @@ type CacheInMemory struct {
 	store          map[string]ValueWithTime
 	callback       func() interface{}
 	cacheClearTime time.Duration
-	sync.Mutex
+	mx             sync.RWMutex
 }
 
 type ValueWithTime struct {
@@ -60,13 +60,16 @@ func NewCacheWithCallbackAndClearTime(callback func() interface{}, cleartime tim
 }
 
 func (c *CacheInMemory) Set(key string, value interface{}) {
-	c.Lock()
+	c.mx.Lock()
 	c.store[key] = ValueWithTime{Time: time.Now(), Value: value}
-	c.Unlock()
+	c.mx.Unlock()
 }
 
 func (c *CacheInMemory) Get(key string) interface{} {
+	c.mx.RLock()
 	value, ok := c.store[key]
+	c.mx.RUnlock()
+
 	diff := time.Now().Sub(value.Time)
 
 	isValidTime := diff <= c.cacheClearTime
