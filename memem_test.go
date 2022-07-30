@@ -6,35 +6,31 @@ import (
 )
 
 func TestCache(t *testing.T) {
-	c := NewCache()
+	c := NewCache[int]()
 	c.Set("id", 12)
 	if c.Get("id") != 12 {
 		t.Error("error not match")
 	}
-	c.Set("hoge", "doremifaso")
-	if c.Get("hoge") != "doremifaso" {
+	c.Set("hoge", 100)
+	if c.Get("hoge") != 100 {
 		t.Error("error")
 	}
 }
 
 func TestArrayCache(t *testing.T) {
-	c := NewCache()
+	c := NewCache[[]string]()
 	slice := []string{"Golang", "Java"}
 	c.Set("key", slice)
 	value := c.Get("key")
-	v, ok := value.([]string)
-	if !ok {
-		t.Error("error cast")
-	}
-	if v[0] != "Golang" {
+	if value[0] != "Golang" {
 		t.Error("error not match")
 	}
 }
 
 func TestGetDataIsNoneCache(t *testing.T) {
-	c := NewCache()
+	c := NewCache[string]()
 	value := c.Get("key")
-	if value != nil {
+	if value != "" {
 		t.Error("not nil")
 	}
 }
@@ -53,7 +49,7 @@ func TestCallbackCache(t *testing.T) {
 }
 
 func TestWithClearTimeNonClear(t *testing.T) {
-	c := NewCacheWithClearTime(time.Second)
+	c := NewCacheWithClearTime[string](time.Second)
 	c.Set("key", "same value")
 	value := c.Get("key")
 	if value != "same value" {
@@ -62,22 +58,13 @@ func TestWithClearTimeNonClear(t *testing.T) {
 }
 
 func TestWithClearTimeClear(t *testing.T) {
-	c := NewCacheWithClearTime(time.Second)
+	c := NewCacheWithClearTime[string](time.Second)
 	c.Set("key", "same value")
 	time.Sleep(2 * time.Second)
 	value := c.Get("key")
-	if value != nil {
+	if value != "" {
 		t.Error("data is not null")
 	}
-}
-
-type initialize struct {
-	F func() interface{}
-	T time.Duration
-}
-
-type cases struct {
-	in initialize
 }
 
 type TestCase struct {
