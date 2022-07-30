@@ -45,9 +45,8 @@ func (c *CacheSyncStore[T]) Get(key string) T {
 		}
 	}
 
-	// Loadに失敗 or キャッシュ削除期間 
+	// Loadに失敗 or キャッシュ削除期間 -> callbackを試みる
 
-	// コールバックがある
 	if c.callback != nil {
 		callbackValue := c.callback()
 		c.Set(key, callbackValue)
@@ -182,13 +181,15 @@ func (c *CacheInMemory[T]) Get(key string) T {
 
 	isValidTime := diff <= c.cacheClearTime
 
-	// 値が存在するかつキャッシュ削除期間じゃない
+	
 	if ok && isValidTime {
+		// 値が存在するかつキャッシュ削除期間じゃない
 		return value.Value
 	}
 
-	// コールバックがあるかつ、値が存在しないか存在しても期限切れの場合コールバックの値を返却する
-	if c.callback != nil && (!ok || (ok && !isValidTime)) {
+	// 値が存在しない or キャッシュ削除期間　-> callbackを試みる
+	
+	if c.callback != nil {
 		callbackValue := c.callback()
 		c.Set(key, callbackValue)
 		return callbackValue
