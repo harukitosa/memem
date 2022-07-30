@@ -6,7 +6,8 @@ import (
 )
 
 func TestCache(t *testing.T) {
-	c := NewCache[int]()
+	t.Parallel()
+	c := NewCache[string, int]()
 	c.Set("id", 12)
 	if c.Get("id") != 12 {
 		t.Error("error not match")
@@ -18,7 +19,8 @@ func TestCache(t *testing.T) {
 }
 
 func TestCacheClear(t *testing.T) {
-	c := NewCache[int]()
+	t.Parallel()
+	c := NewCache[string, int]()
 	c.Set("id", 12)
 	if c.Get("id") != 12 {
 		t.Error("error not match")
@@ -28,13 +30,14 @@ func TestCacheClear(t *testing.T) {
 		t.Error("error")
 	}
 	c.Clear()
-	if c.Get("hoge") == 0 {
+	if c.Get("hoge") != 0 {
 		t.Error("error")
 	}
 }
 
 func TestArrayCache(t *testing.T) {
-	c := NewCache[[]string]()
+	t.Parallel()
+	c := NewCache[string, []string]()
 	slice := []string{"Golang", "Java"}
 	c.Set("key", slice)
 	value := c.Get("key")
@@ -44,7 +47,8 @@ func TestArrayCache(t *testing.T) {
 }
 
 func TestGetDataIsNoneCache(t *testing.T) {
-	c := NewCache[string]()
+	t.Parallel()
+	c := NewCache[string, string]()
 	value := c.Get("key")
 	if value != "" {
 		t.Error("not nil")
@@ -52,7 +56,8 @@ func TestGetDataIsNoneCache(t *testing.T) {
 }
 
 func TestCallbackCache(t *testing.T) {
-	c := NewCacheWithCallback(func() interface{} {
+	t.Parallel()
+	c := NewCacheWithCallback[string](func() interface{} {
 		return "callback result"
 	})
 	value := c.Get("callback result")
@@ -65,7 +70,8 @@ func TestCallbackCache(t *testing.T) {
 }
 
 func TestWithClearTimeNonClear(t *testing.T) {
-	c := NewCacheWithClearTime[string](time.Second)
+	t.Parallel()
+	c := NewCacheWithClearTime[string, string](time.Second)
 	c.Set("key", "same value")
 	value := c.Get("key")
 	if value != "same value" {
@@ -74,7 +80,8 @@ func TestWithClearTimeNonClear(t *testing.T) {
 }
 
 func TestWithClearTimeClear(t *testing.T) {
-	c := NewCacheWithClearTime[string](time.Second)
+	t.Parallel()
+	c := NewCacheWithClearTime[string, string](time.Second)
 	c.Set("key", "same value")
 	time.Sleep(2 * time.Second)
 	value := c.Get("key")
@@ -121,24 +128,28 @@ func TestWithClearTimeAndCallback(t *testing.T) {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			c := NewCacheWithCallbackAndClearTime(tt.in.f, tt.in.t)
+			c := NewCacheWithCallbackAndClearTime[string](tt.in.f, tt.in.t)
 			c.Set("key", "value")
 			if tt.in.isClear {
 				time.Sleep(2 * time.Second)
 				value, ok := c.Get("key").(string)
 				if !ok {
 					t.Error("cast miss")
+					return
 				}
 				if value != tt.want {
 					t.Error("is not want value")
+					return
 				}
 			} else {
 				value, ok := c.Get("key").(string)
 				if !ok {
 					t.Error("cast miss")
+					return
 				}
 				if value != tt.want {
 					t.Error("is not want value")
+					return
 				}
 			}
 		})

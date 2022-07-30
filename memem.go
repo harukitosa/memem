@@ -5,14 +5,14 @@ import (
 	"time"
 )
 
-type Cache[T any] interface {
-	Set(key string, value T)
-	Get(key string) T
+type Cache[K comparable, T any] interface {
+	Set(key K, value T)
+	Get(key K) T
 	Clear()
 }
 
-type CacheInMemory[T any] struct {
-	store          map[string]ValueWithTime[T]
+type CacheInMemory[K comparable, T any] struct {
+	store          map[K]ValueWithTime[T]
 	callback       func() T
 	cacheClearTime time.Duration
 	mx             sync.RWMutex
@@ -23,50 +23,50 @@ type ValueWithTime[T any] struct {
 	Time  time.Time
 }
 
-func NewCache[T any]() Cache[T] {
-	m := make(map[string]ValueWithTime[T])
+func NewCache[K comparable, T any]() Cache[K, T] {
+	m := make(map[K]ValueWithTime[T])
 	// cacheClearTime: キャッシュの有効時間、defaultはISUCONに合わせて60s
-	return &CacheInMemory[T]{
+	return &CacheInMemory[K, T]{
 		store:          m,
 		callback:       nil,
 		cacheClearTime: time.Second * 60,
 	}
 }
 
-func NewCacheWithCallback[T any](callback func() T) Cache[T] {
-	m := make(map[string]ValueWithTime[T])
-	return &CacheInMemory[T]{
+func NewCacheWithCallback[K comparable, T any](callback func() T) Cache[K, T] {
+	m := make(map[K]ValueWithTime[T])
+	return &CacheInMemory[K, T]{
 		store:          m,
 		callback:       callback,
 		cacheClearTime: time.Second * 60,
 	}
 }
 
-func NewCacheWithClearTime[T any](cleartime time.Duration) Cache[T] {
-	m := make(map[string]ValueWithTime[T])
-	return &CacheInMemory[T]{
+func NewCacheWithClearTime[K comparable, T any](cleartime time.Duration) Cache[K, T] {
+	m := make(map[K]ValueWithTime[T])
+	return &CacheInMemory[K, T]{
 		store:          m,
 		callback:       nil,
 		cacheClearTime: cleartime,
 	}
 }
 
-func NewCacheWithCallbackAndClearTime[T any](callback func() T, cleartime time.Duration) Cache[T] {
-	m := make(map[string]ValueWithTime[T])
-	return &CacheInMemory[T]{
+func NewCacheWithCallbackAndClearTime[K comparable, T any](callback func() T, cleartime time.Duration) Cache[K, T] {
+	m := make(map[K]ValueWithTime[T])
+	return &CacheInMemory[K, T]{
 		store:          m,
 		callback:       callback,
 		cacheClearTime: cleartime,
 	}
 }
 
-func (c *CacheInMemory[T]) Set(key string, value T) {
+func (c *CacheInMemory[K, T]) Set(key K, value T) {
 	c.mx.Lock()
 	c.store[key] = ValueWithTime[T]{Time: time.Now(), Value: value}
 	c.mx.Unlock()
 }
 
-func (c *CacheInMemory[T]) Get(key string) T {
+func (c *CacheInMemory[K, T]) Get(key K) T {
 	c.mx.RLock()
 	value, ok := c.store[key]
 	c.mx.RUnlock()
@@ -91,6 +91,6 @@ func (c *CacheInMemory[T]) Get(key string) T {
 	return res
 }
 
-func (c *CacheInMemory[T]) Clear() {
-	c.store = make(map[string]ValueWithTime[T])
+func (c *CacheInMemory[K, T]) Clear() {
+	c.store = make(map[K]ValueWithTime[T])
 }
