@@ -45,7 +45,7 @@ func (c *CacheSyncStore[T]) Get(key string) T {
 		}
 	}
 
-	// Loadに失敗 or キャッシュ削除期間 or キャッシュが見つかったけど、ValueWithTime[T]ではない
+	// Loadに失敗 or キャッシュ削除期間 
 
 	// コールバックがある
 	if c.callback != nil {
