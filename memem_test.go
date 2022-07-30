@@ -17,6 +17,22 @@ func TestCache(t *testing.T) {
 	}
 }
 
+func TestCacheClear(t *testing.T) {
+	c := NewCache[int]()
+	c.Set("id", 12)
+	if c.Get("id") != 12 {
+		t.Error("error not match")
+	}
+	c.Set("hoge", 100)
+	if c.Get("hoge") != 100 {
+		t.Error("error")
+	}
+	c.Clear()
+	if c.Get("hoge") == 0 {
+		t.Error("error")
+	}
+}
+
 func TestArrayCache(t *testing.T) {
 	c := NewCache[[]string]()
 	slice := []string{"Golang", "Java"}

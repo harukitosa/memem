@@ -8,6 +8,7 @@ import (
 type Cache[T any] interface {
 	Set(key string, value T)
 	Get(key string) T
+	Clear()
 }
 
 type CacheInMemory[T any] struct {
@@ -24,11 +25,11 @@ type ValueWithTime[T any] struct {
 
 func NewCache[T any]() Cache[T] {
 	m := make(map[string]ValueWithTime[T])
-	// cacheClearTime: キャッシュの有効時間、defaultは1時間
+	// cacheClearTime: キャッシュの有効時間、defaultはISUCONに合わせて60s
 	return &CacheInMemory[T]{
 		store:          m,
 		callback:       nil,
-		cacheClearTime: time.Hour,
+		cacheClearTime: time.Second * 60,
 	}
 }
 
@@ -37,7 +38,7 @@ func NewCacheWithCallback[T any](callback func() T) Cache[T] {
 	return &CacheInMemory[T]{
 		store:          m,
 		callback:       callback,
-		cacheClearTime: time.Hour,
+		cacheClearTime: time.Second * 60,
 	}
 }
 
@@ -88,4 +89,8 @@ func (c *CacheInMemory[T]) Get(key string) T {
 	var res T
 	// それ以外はnilで返却
 	return res
+}
+
+func (c *CacheInMemory[T]) Clear() {
+	c.store = make(map[string]ValueWithTime[T])
 }
