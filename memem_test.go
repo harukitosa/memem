@@ -6,7 +6,8 @@ import (
 )
 
 func TestCache(t *testing.T) {
-	c := NewCache[int]()
+	t.Parallel()
+	c := NewCache[string, int]()
 	c.Set("id", 12)
 	if c.Get("id") != 12 {
 		t.Error("error not match")
@@ -18,7 +19,8 @@ func TestCache(t *testing.T) {
 }
 
 func TestCacheClear(t *testing.T) {
-	c := NewCache[int]()
+	t.Parallel()
+	c := NewCache[string, int]()
 	c.Set("id", 12)
 	if c.Get("id") != 12 {
 		t.Error("error not match")
@@ -34,7 +36,8 @@ func TestCacheClear(t *testing.T) {
 }
 
 func TestArrayCache(t *testing.T) {
-	c := NewCache[[]string]()
+	t.Parallel()
+	c := NewCache[string, []string]()
 	slice := []string{"Golang", "Java"}
 	c.Set("key", slice)
 	value := c.Get("key")
@@ -44,7 +47,8 @@ func TestArrayCache(t *testing.T) {
 }
 
 func TestGetDataIsNoneCache(t *testing.T) {
-	c := NewCache[string]()
+	t.Parallel()
+	c := NewCache[string, string]()
 	value := c.Get("key")
 	if value != "" {
 		t.Error("not nil")
@@ -52,7 +56,8 @@ func TestGetDataIsNoneCache(t *testing.T) {
 }
 
 func TestCallbackCache(t *testing.T) {
-	c := NewCacheWithCallback(func() interface{} {
+	t.Parallel()
+	c := NewCacheWithCallback[string](func() interface{} {
 		return "callback result"
 	})
 	value := c.Get("callback result")
@@ -65,7 +70,8 @@ func TestCallbackCache(t *testing.T) {
 }
 
 func TestWithClearTimeNonClear(t *testing.T) {
-	c := NewCacheWithClearTime[string](time.Second)
+	t.Parallel()
+	c := NewCacheWithClearTime[string, string](time.Second)
 	c.Set("key", "same value")
 	value := c.Get("key")
 	if value != "same value" {
@@ -74,7 +80,8 @@ func TestWithClearTimeNonClear(t *testing.T) {
 }
 
 func TestWithClearTimeClear(t *testing.T) {
-	c := NewCacheWithClearTime[string](time.Second)
+	t.Parallel()
+	c := NewCacheWithClearTime[string, string](time.Second)
 	c.Set("key", "same value")
 	time.Sleep(2 * time.Second)
 	value := c.Get("key")
@@ -83,24 +90,24 @@ func TestWithClearTimeClear(t *testing.T) {
 	}
 }
 
-type TestCase struct {
-	f       func() interface{}
+type TestCase[T any] struct {
+	f       func() T
 	t       time.Duration
 	isClear bool
 }
 
 func TestWithClearTimeAndCallback(t *testing.T) {
-	f := func() interface{} {
+	f := func() string {
 		return "callback value"
 	}
 	cases := []struct {
 		name string
-		in   TestCase
+		in   TestCase[string]
 		want string
 	}{
 		{
 			"期限切れしていない場合キャッシュが返却される",
-			TestCase{
+			TestCase[string]{
 				f,
 				time.Second,
 				false,
@@ -109,7 +116,7 @@ func TestWithClearTimeAndCallback(t *testing.T) {
 		},
 		{
 			"期限が過ぎている場合callbackの値が返却される",
-			TestCase{
+			TestCase[string]{
 				f,
 				time.Second,
 				true,
@@ -121,24 +128,20 @@ func TestWithClearTimeAndCallback(t *testing.T) {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			c := NewCacheWithCallbackAndClearTime(tt.in.f, tt.in.t)
+			c := NewCacheWithCallbackAndClearTime[string](tt.in.f, tt.in.t)
 			c.Set("key", "value")
 			if tt.in.isClear {
 				time.Sleep(2 * time.Second)
-				value, ok := c.Get("key").(string)
-				if !ok {
-					t.Error("cast miss")
-				}
+				value := c.Get("key")
 				if value != tt.want {
 					t.Error("is not want value")
+					return
 				}
 			} else {
-				value, ok := c.Get("key").(string)
-				if !ok {
-					t.Error("cast miss")
-				}
+				value := c.Get("key")
 				if value != tt.want {
 					t.Error("is not want value")
+					return
 				}
 			}
 		})
@@ -148,7 +151,7 @@ func TestWithClearTimeAndCallback(t *testing.T) {
 // test for CacheSyncStore
 
 func Test_CacheSyncStore_Cache(t *testing.T) {
-	c := NewCache[int](UseSyncMap)
+	c := NewCache[string, int](UseSyncMap)
 	c.Set("id", 12)
 	if c.Get("id") != 12 {
 		t.Error("error not match")
@@ -160,7 +163,7 @@ func Test_CacheSyncStore_Cache(t *testing.T) {
 }
 
 func Test_CacheSyncStore_CacheClear(t *testing.T) {
-	c := NewCache[int](UseSyncMap)
+	c := NewCache[string, int](UseSyncMap)
 	c.Set("id", 12)
 	if c.Get("id") != 12 {
 		t.Error("error not match")
@@ -176,7 +179,7 @@ func Test_CacheSyncStore_CacheClear(t *testing.T) {
 }
 
 func Test_CacheSyncStore_ArrayCache(t *testing.T) {
-	c := NewCache[[]string](UseSyncMap)
+	c := NewCache[string, []string](UseSyncMap)
 	slice := []string{"Golang", "Java"}
 	c.Set("key", slice)
 	value := c.Get("key")
@@ -186,7 +189,7 @@ func Test_CacheSyncStore_ArrayCache(t *testing.T) {
 }
 
 func Test_CacheSyncStore_GetDataIsNoneCache(t *testing.T) {
-	c := NewCache[string](UseSyncMap)
+	c := NewCache[string, string](UseSyncMap)
 	value := c.Get("key")
 	if value != "" {
 		t.Error("not nil")
@@ -194,7 +197,7 @@ func Test_CacheSyncStore_GetDataIsNoneCache(t *testing.T) {
 }
 
 func Test_CacheSyncStore_CallbackCache(t *testing.T) {
-	c := NewCacheWithCallback(func() interface{} {
+	c := NewCacheWithCallback[string](func() interface{} {
 		return "callback result"
 	}, UseSyncMap)
 	value := c.Get("callback result")
@@ -207,7 +210,7 @@ func Test_CacheSyncStore_CallbackCache(t *testing.T) {
 }
 
 func Test_CacheSyncStore_WithClearTimeNonClear(t *testing.T) {
-	c := NewCacheWithClearTime[string](time.Second, UseSyncMap)
+	c := NewCacheWithClearTime[string, string](time.Second, UseSyncMap)
 	c.Set("key", "same value")
 	value := c.Get("key")
 	if value != "same value" {
@@ -216,7 +219,7 @@ func Test_CacheSyncStore_WithClearTimeNonClear(t *testing.T) {
 }
 
 func Test_CacheSyncStore_WithClearTimeClear(t *testing.T) {
-	c := NewCacheWithClearTime[string](time.Second, UseSyncMap)
+	c := NewCacheWithClearTime[string, string](time.Second, UseSyncMap)
 	c.Set("key", "same value")
 	time.Sleep(2 * time.Second)
 	value := c.Get("key")
@@ -225,24 +228,18 @@ func Test_CacheSyncStore_WithClearTimeClear(t *testing.T) {
 	}
 }
 
-type Test_CacheSyncStore_Case struct {
-	f       func() interface{}
-	t       time.Duration
-	isClear bool
-}
-
 func Test_CacheSyncStore_WithClearTimeAndCallback(t *testing.T) {
-	f := func() interface{} {
+	f := func() string {
 		return "callback value"
 	}
 	cases := []struct {
 		name string
-		in   TestCase
+		in   TestCase[string]
 		want string
 	}{
 		{
 			"期限切れしていない場合キャッシュが返却される",
-			TestCase{
+			TestCase[string]{
 				f,
 				time.Second,
 				false,
@@ -251,7 +248,7 @@ func Test_CacheSyncStore_WithClearTimeAndCallback(t *testing.T) {
 		},
 		{
 			"期限が過ぎている場合callbackの値が返却される",
-			TestCase{
+			TestCase[string]{
 				f,
 				time.Second,
 				true,
@@ -263,22 +260,16 @@ func Test_CacheSyncStore_WithClearTimeAndCallback(t *testing.T) {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			c := NewCacheWithCallbackAndClearTime(tt.in.f, tt.in.t, UseSyncMap)
+			c := NewCacheWithCallbackAndClearTime[string](tt.in.f, tt.in.t, UseSyncMap)
 			c.Set("key", "value")
 			if tt.in.isClear {
 				time.Sleep(2 * time.Second)
-				value, ok := c.Get("key").(string)
-				if !ok {
-					t.Error("cast miss")
-				}
+				value := c.Get("key")
 				if value != tt.want {
 					t.Error("is not want value")
 				}
 			} else {
-				value, ok := c.Get("key").(string)
-				if !ok {
-					t.Error("cast miss")
-				}
+				value := c.Get("key")
 				if value != tt.want {
 					t.Error("is not want value")
 				}
