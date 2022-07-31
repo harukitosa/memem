@@ -14,6 +14,8 @@ jobs:
         with:
           go-version: "1.18"
         id: go
+      - name: checkversion
+        run: go version
       # 処理を高速化するために環境をキャッシュ
       # - name: Cache
       #   uses: actions/cache@v2.1.0
