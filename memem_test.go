@@ -57,13 +57,10 @@ func TestGetDataIsNoneCache(t *testing.T) {
 
 func TestCallbackCache(t *testing.T) {
 	t.Parallel()
-	c := NewCacheWithCallback[string](func() interface{} {
+	c := NewCacheWithCallback[string](func() string {
 		return "callback result"
 	})
 	value := c.Get("callback result")
-	if value == nil {
-		t.Error("is not callback value")
-	}
 	if value != "callback result" {
 		t.Error("is not callback value")
 	}
@@ -197,13 +194,10 @@ func Test_CacheSyncStore_GetDataIsNoneCache(t *testing.T) {
 }
 
 func Test_CacheSyncStore_CallbackCache(t *testing.T) {
-	c := NewCacheWithCallback[string](func() interface{} {
+	c := NewCacheWithCallback[string](func() string {
 		return "callback result"
 	}, UseSyncMap)
 	value := c.Get("callback result")
-	if value == nil {
-		t.Error("is not callback value")
-	}
 	if value != "callback result" {
 		t.Error("is not callback value")
 	}
