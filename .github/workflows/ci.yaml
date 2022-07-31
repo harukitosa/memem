@@ -10,19 +10,19 @@ jobs:
       - name: set up
         uses: actions/setup-go@v3
         with:
-          go-version-file: '/go.mod'
+          go-version: 1.18
         id: go
       - name: check out
         uses: actions/checkout@v3
 
       # 処理を高速化するために環境をキャッシュ
-      # - name: Cache
-      #   uses: actions/cache@v2.1.0
-      #   with:
-      #     path: ~/go/pkg/mod
-      #     key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-      #     restore-keys: |
-      #       ${{ runner.os }}-go-
+      - name: Cache
+        uses: actions/cache@v2.1.0
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
 
   # buildテスト
   build:
