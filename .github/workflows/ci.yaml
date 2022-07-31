@@ -32,9 +32,9 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: check-v
-        run: go version
+        run: go1.18 version
       - name: build
-        run: go build ./...
+        run: go1.18 build ./...
 
   # testを通す
   test:
@@ -43,7 +43,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: test
-        run: go test ./... -v
+        run: go1.18 test ./... -v
 
   # lintを通す
   lint:
