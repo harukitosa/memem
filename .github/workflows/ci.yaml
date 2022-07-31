@@ -4,18 +4,10 @@ on: [push]
 
 jobs:
   # 共通処理
-  setup:
-    runs-on: ubuntu-latest
-    steps:
-      - name: set up
-        uses: actions/setup-go@v3
-        with:
-          go-version: "1.18"
-        id: go
-      - name: check out
-        uses: actions/checkout@v3
-      - name: checkversion
-        run: go version
+  # setup:
+  #   runs-on: ubuntu-latest
+  #   steps:
+
       # 処理を高速化するために環境をキャッシュ
       # - name: Cache
       #   uses: actions/cache@v2.1.0
@@ -27,9 +19,17 @@ jobs:
 
   # buildテスト
   build:
-    needs: setup
     runs-on: ubuntu-latest
     steps:
+      - name: set up
+        uses: actions/setup-go@v3
+        with:
+          go-version: "1.18"
+        id: go
+      - name: check out
+        uses: actions/checkout@v3
+      - name: checkversion
+        run: go version
       - uses: actions/checkout@v3
       - name: check-v
         run: go version
@@ -41,6 +41,15 @@ jobs:
     needs: setup
     runs-on: ubuntu-latest
     steps:
+      - name: set up
+        uses: actions/setup-go@v3
+        with:
+          go-version: "1.18"
+        id: go
+      - name: check out
+        uses: actions/checkout@v3
+      - name: checkversion
+        run: go version
       - uses: actions/checkout@v3
       - name: test
         run: go test ./... -v
@@ -50,6 +59,15 @@ jobs:
     needs: setup
     runs-on: ubuntu-latest
     steps:
+      - name: set up
+        uses: actions/setup-go@v3
+        with:
+          go-version: "1.18"
+        id: go
+      - name: check out
+        uses: actions/checkout@v3
+      - name: checkversion
+        run: go version
       - uses: actions/checkout@v3
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v2
